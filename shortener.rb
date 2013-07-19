@@ -42,17 +42,7 @@ eos
 #
 # http://guides.rubyonrails.org/association_basics.html
 
-class MakeLinks < ActiveRecord::Migration
-  # I kept encountering an error where the links table was not created
-  def self.create_links_table
-    create_table(:links) do |t|
-      t.column :token, :text
-      t.column :url, :text
-    end
-  end
-end
-
-class Link # < ActiveRecord::Base
+class Link < ActiveRecord::Base
   # Insert a url with a unique token into the links database.
   attr_reader :url_token, :url_full
   def initialize(url_input)
