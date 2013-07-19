@@ -90,7 +90,6 @@ DEPENDENCIES
   guard-rspec
   pry
   rake
-  rb-fsevent
   rspec
   sinatra
   sinatra-contrib

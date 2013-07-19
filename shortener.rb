@@ -41,15 +41,37 @@ eos
 # associations here if need be
 #
 # http://guides.rubyonrails.org/association_basics.html
-class Link < ActiveRecord::Base
+
+class MakeLinks < ActiveRecord::Migration
+  # I kept encountering an error where the links table was not created
+  def self.create_links_table
+    create_table(:links) do |t|
+      t.column :token, :text
+      t.column :url, :text
+    end
+  end
+end
+
+class Link # < ActiveRecord::Base
+  # Insert a url with a unique token into the links database.
+  attr_reader :url_token, :url_full
+  def initialize(url_input)
+    @url_full = url_input
+  end
+  def url_token
+    # FIXME: The following method does not ensure the uniqueness of tokens.
+    @url_token = rand(36**8).to_s(36)
+  end
 end
 
 get '/' do
     form
+
 end
 
 post '/new' do
-    # PUT CODE HERE TO CREATE NEW SHORTENED LINKS
+   url = request.body.read.slice(4, 500) # Arbitrary limit set on URL length, may be helpful in case someone tries to spam maliciously
+   entry = Link.new(url)
 end
 
 get '/jquery.js' do
