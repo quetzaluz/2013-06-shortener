@@ -55,7 +55,14 @@ class Link < ActiveRecord::Base
 end
 
 get '/' do
-    form
+  links = Link.all
+
+  output = ""
+  links.each do |link|
+    output << "<a href='#{link.token}'>#{link.url}</a><br />"
+  end
+
+  return form + output
 
 end
 
