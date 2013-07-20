@@ -10,6 +10,7 @@ configure :development, :production do
      )
 end
 
+
 # Quick and dirty form for testing application
 #
 # If building a real application you should probably
@@ -54,10 +55,17 @@ class Link < ActiveRecord::Base
   end
 end
 
+# For some reason it was very difficult to query through ActiveRecord, so stored values here.
+local_db = {}
+
+Link.all.each do |link|
+  local_db[link.token] = link.url
+end
+
 get '/' do
   links = Link.all
 
-  output = ""
+  output = "<h2>Links already generated:</h2>"
   links.each do |link|
     output << "<a href='#{link.token}'>#{link.url}</a><br />"
   end
@@ -68,7 +76,11 @@ end
 
 post '/new' do
   request_data = request.body.read.slice(4, 500) # Arbitrary limit set on URL length, may be helpful in case someone tries to spam maliciously
-  Link.find_or_create_by_url(request_data, :token => rand(36**8).to_s(36))
+  short_url = rand(36**8).to_s(36)
+  body "/#{short_url}" # return shortened URL to user -- see specs.
+  exists = true if local_db.has_value?(request_data)
+  Link.find_or_create_by_url(request_data, :token => short_url) unless exists
+  local_db[short_url] = request_data
 end
 
 get '/jquery.js' do
@@ -79,11 +91,6 @@ end
 ####  Implement Routes to make the specs pass ######
 ####################################################
 
-local_db = {}
-
-Link.all.each do |link|
-  local_db[link.token] = link.url
-end
 
 
 get '/:short_url' do
