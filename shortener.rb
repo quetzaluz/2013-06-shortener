@@ -78,3 +78,19 @@ end
 ####################################################
 ####  Implement Routes to make the specs pass ######
 ####################################################
+
+local_db = {}
+
+Link.all.each do |link|
+  local_db[link.token] = link.url
+end
+
+
+get '/:short_url' do
+  if local_db[params[:short_url]]
+    # FIXME: Handle urls that already have http:// or https://
+    redirect "http://#{local_db[params[:short_url]]}"
+  else
+    pass
+  end
+end
