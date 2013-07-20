@@ -44,13 +44,14 @@ eos
 
 class Link < ActiveRecord::Base
   # Insert a url with a unique token into the links database.
-  attr_reader :url_token, :url_full
-  def initialize(url_input)
-    @url_full = url_input
-  end
-  def url_token
-    # FIXME: The following method does not ensure the uniqueness of tokens.
-    @url_token = rand(36**8).to_s(36)
+  self.table_name = "links"
+  belongs_to :links
+  attr_reader :url, :token
+  def initialize_after(url_input, url_token)
+    @url = url_input
+    @token = url_token
+    update_attribute(:token, @url_input)
+    update_attribute(:url, @url_token)
   end
 end
 
@@ -60,8 +61,12 @@ get '/' do
 end
 
 post '/new' do
-   url = request.body.read.slice(4, 500) # Arbitrary limit set on URL length, may be helpful in case someone tries to spam maliciously
-   entry = Link.new(url)
+  request_data = request.body.read.slice(4, 500) # Arbitrary limit set on URL length, may be helpful in case someone tries to spam maliciously
+  # I was not able to use ActiveRecord's find_or_create_by with my version of ruby
+  exists = false #later put a query to find record here.
+  Link.create(:url => request_data, :token => rand(36**8).to_s(36)) unless exists
+  puts Link.all.length
+  puts Link.where(url: request_data)
 end
 
 get '/jquery.js' do
